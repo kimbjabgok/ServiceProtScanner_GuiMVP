@@ -10,6 +10,7 @@
 
 #include "result_model.hpp"
 #include "cvss_delegate.hpp"
+#include "details_panel.hpp"
 #include "charts_panel.hpp"
 #include "dummy_data.hpp"
 
@@ -31,6 +32,7 @@ private:
     ResultModel*            model_  = nullptr;
     QSortFilterProxyModel*  proxy_  = nullptr;
     QTableView*             table_  = nullptr;
+    DetailsPanel*           detail_ = nullptr;
     ChartsPanel*            charts_ = nullptr;
 
     void setup_ui() {
@@ -50,20 +52,35 @@ private:
         auto* delegate = new CvssDelegate(this);
         table_->setItemDelegateForColumn(ResultModel::ColMaxCvss, delegate);
 
+        connect(table_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+                this, &MainWindow::on_row_selected);
+
+        detail_ = new DetailsPanel(this);
         charts_ = new ChartsPanel(this);
         charts_->setMinimumHeight(250);
 
-        auto* topWidget = new QWidget;
-        auto* topLayout = new QVBoxLayout(topWidget);
-        topLayout->setContentsMargins(0, 0, 0, 0);
-        topLayout->addWidget(new QLabel("Scan Results"));
-        topLayout->addWidget(table_, 1);
+        auto* tableWidget = new QWidget;
+        auto* tableLayout = new QVBoxLayout(tableWidget);
+        tableLayout->setContentsMargins(0, 0, 0, 0);
+        tableLayout->addWidget(new QLabel("Scan Results"));
+        tableLayout->addWidget(table_, 1);
 
-        auto* splitter = new QSplitter(Qt::Vertical);
-        splitter->addWidget(topWidget);
-        splitter->addWidget(charts_);
+        auto* leftSplitter = new QSplitter(Qt::Vertical);
+        leftSplitter->addWidget(tableWidget);
+        leftSplitter->addWidget(charts_);
+        leftSplitter->setStretchFactor(0, 3);
+        leftSplitter->setStretchFactor(1, 2);
+
+        auto* right = new QWidget;
+        auto* rightLayout = new QVBoxLayout(right);
+        rightLayout->addWidget(new QLabel("Details"));
+        rightLayout->addWidget(detail_, 1);
+
+        auto* splitter = new QSplitter(Qt::Horizontal);
+        splitter->addWidget(leftSplitter);
+        splitter->addWidget(right);
         splitter->setStretchFactor(0, 3);
-        splitter->setStretchFactor(1, 2);
+        splitter->setStretchFactor(1, 1);
 
         setCentralWidget(splitter);
     }
@@ -72,6 +89,12 @@ private:
         auto data = sps::test::make_dummy_results();
         model_->setResults(data);
         charts_->updateData(data);
+    }
+
+    void on_row_selected(const QModelIndex& current) {
+        if (!current.isValid()) return;
+        QModelIndex src = proxy_->mapToSource(current);
+        detail_->showResult(model_->resultAt(src.row()));
     }
 };
 
