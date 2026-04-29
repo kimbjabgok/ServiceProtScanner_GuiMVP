@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QSplitter>
 #include <QTableView>
 #include <QHeaderView>
 #include <QVBoxLayout>
@@ -9,6 +10,7 @@
 
 #include "result_model.hpp"
 #include "cvss_delegate.hpp"
+#include "charts_panel.hpp"
 #include "dummy_data.hpp"
 
 namespace sps::gui {
@@ -26,9 +28,10 @@ public:
     ResultModel* resultModel() const { return model_; }
 
 private:
-    ResultModel*            model_ = nullptr;
-    QSortFilterProxyModel*  proxy_ = nullptr;
-    QTableView*             table_ = nullptr;
+    ResultModel*            model_  = nullptr;
+    QSortFilterProxyModel*  proxy_  = nullptr;
+    QTableView*             table_  = nullptr;
+    ChartsPanel*            charts_ = nullptr;
 
     void setup_ui() {
         model_ = new ResultModel(this);
@@ -47,15 +50,28 @@ private:
         auto* delegate = new CvssDelegate(this);
         table_->setItemDelegateForColumn(ResultModel::ColMaxCvss, delegate);
 
-        auto* central = new QWidget;
-        auto* layout = new QVBoxLayout(central);
-        layout->addWidget(new QLabel("Scan Results"));
-        layout->addWidget(table_, 1);
-        setCentralWidget(central);
+        charts_ = new ChartsPanel(this);
+        charts_->setMinimumHeight(250);
+
+        auto* topWidget = new QWidget;
+        auto* topLayout = new QVBoxLayout(topWidget);
+        topLayout->setContentsMargins(0, 0, 0, 0);
+        topLayout->addWidget(new QLabel("Scan Results"));
+        topLayout->addWidget(table_, 1);
+
+        auto* splitter = new QSplitter(Qt::Vertical);
+        splitter->addWidget(topWidget);
+        splitter->addWidget(charts_);
+        splitter->setStretchFactor(0, 3);
+        splitter->setStretchFactor(1, 2);
+
+        setCentralWidget(splitter);
     }
 
     void load_dummy_data() {
-        model_->setResults(sps::test::make_dummy_results());
+        auto data = sps::test::make_dummy_results();
+        model_->setResults(data);
+        charts_->updateData(data);
     }
 };
 
