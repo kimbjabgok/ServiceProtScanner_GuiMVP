@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QSplitter>
 #include <QTableView>
 #include <QHeaderView>
 #include <QVBoxLayout>
@@ -10,6 +11,7 @@
 
 #include "result_model.hpp"
 #include "cvss_delegate.hpp"
+#include "details_panel.hpp"
 #include "export_actions.hpp"
 #include "dummy_data.hpp"
 
@@ -28,9 +30,10 @@ public:
     ResultModel* resultModel() const { return model_; }
 
 private:
-    ResultModel*            model_ = nullptr;
-    QSortFilterProxyModel*  proxy_ = nullptr;
-    QTableView*             table_ = nullptr;
+    ResultModel*            model_  = nullptr;
+    QSortFilterProxyModel*  proxy_  = nullptr;
+    QTableView*             table_  = nullptr;
+    DetailsPanel*           detail_ = nullptr;
 
     void setup_ui() {
         model_ = new ResultModel(this);
@@ -49,22 +52,46 @@ private:
         auto* delegate = new CvssDelegate(this);
         table_->setItemDelegateForColumn(ResultModel::ColMaxCvss, delegate);
 
+        connect(table_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+                this, &MainWindow::on_row_selected);
+
+        detail_ = new DetailsPanel(this);
+
         auto* btn_export = new QPushButton("Export Report");
         btn_export->setMinimumHeight(40);
         connect(btn_export, &QPushButton::clicked, this, [this]() {
             ExportActions::exportResults(this, model_->allResults());
         });
 
-        auto* central = new QWidget;
-        auto* layout = new QVBoxLayout(central);
-        layout->addWidget(new QLabel("Scan Results"));
-        layout->addWidget(table_, 1);
-        layout->addWidget(btn_export);
-        setCentralWidget(central);
+        auto* left = new QWidget;
+        auto* leftLayout = new QVBoxLayout(left);
+        leftLayout->setContentsMargins(0, 0, 0, 0);
+        leftLayout->addWidget(new QLabel("Scan Results"));
+        leftLayout->addWidget(table_, 1);
+
+        auto* right = new QWidget;
+        auto* rightLayout = new QVBoxLayout(right);
+        rightLayout->addWidget(new QLabel("Details"));
+        rightLayout->addWidget(detail_, 1);
+        rightLayout->addWidget(btn_export);
+
+        auto* splitter = new QSplitter(Qt::Horizontal);
+        splitter->addWidget(left);
+        splitter->addWidget(right);
+        splitter->setStretchFactor(0, 3);
+        splitter->setStretchFactor(1, 1);
+
+        setCentralWidget(splitter);
     }
 
     void load_dummy_data() {
         model_->setResults(sps::test::make_dummy_results());
+    }
+
+    void on_row_selected(const QModelIndex& current) {
+        if (!current.isValid()) return;
+        QModelIndex src = proxy_->mapToSource(current);
+        detail_->showResult(model_->resultAt(src.row()));
     }
 };
 
