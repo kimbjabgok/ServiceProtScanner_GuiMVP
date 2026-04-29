@@ -1,6 +1,5 @@
 #include <QApplication>
-#include <QMainWindow>
-#include <QLabel>
+#include "gui/views/main_window.hpp"
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
@@ -18,9 +17,8 @@ int main(int argc, char* argv[]) {
     dark.setColor(QPalette::HighlightedText, QColor(255, 255, 255));
     app.setPalette(dark);
 
-    QMainWindow w;
+    sps::gui::MainWindow w;
     w.setWindowTitle("Service Port Scanner — Prototype");
-    w.setCentralWidget(new QLabel("SPS — GUI placeholder"));
     w.resize(1200, 700);
     w.show();
 
