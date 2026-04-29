@@ -45,6 +45,14 @@ struct CveInfo {
     std::string nuclei_template_id;     // e.g. "CVE-2018-15473"
 };
 
+// ── 핑거프린트 정보 (효율성 개선 문서) ──────────
+struct FingerprintInfo {
+    std::string ja4s;       // JA4S TLS 서버 핑거프린트
+    std::string ja4x;       // JA4X X.509 인증서 핑거프린트
+    std::string cdn;        // CDN 벤더 ("Cloudflare", "Akamai", "")
+    std::string os_guess;   // OS 추정 결과 (TTL/window 기반)
+};
+
 // ── 서비스 식별 결과 ─────────────────────────────
 struct ServiceInfo {
     std::string name;       // "http", "ssh", "mysql", "redis", ...
@@ -65,6 +73,9 @@ struct ScanResult {
 
     // ── 서비스 식별 (probe 결과) ──
     ServiceInfo service;
+
+    // ── 핑거프린트 (효율성 개선) ──
+    FingerprintInfo fingerprint;
 
     // ── 취약점 정보 (CVE lookup 결과) ──
     std::vector<CveInfo> cves;
