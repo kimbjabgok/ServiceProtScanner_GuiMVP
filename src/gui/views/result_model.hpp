@@ -21,6 +21,10 @@ public:
         ColMaxCvss,
         ColMaxEpss,
         ColVerified,
+        ColJA4S,
+        ColJA4X,
+        ColCDN,
+        ColOS,
         ColCount        // 총 컬럼 수
     };
 
@@ -53,6 +57,10 @@ public:
             case ColMaxCvss:   return "CVSS";
             case ColMaxEpss:   return "EPSS";
             case ColVerified:  return "Verified";
+            case ColJA4S:      return "JA4S";
+            case ColJA4X:      return "JA4X";
+            case ColCDN:       return "CDN";
+            case ColOS:        return "OS";
             default:           return {};
         }
     }
@@ -75,6 +83,10 @@ public:
                 case ColMaxCvss:   return r.cves.empty() ? QVariant{} : QVariant{r.max_cvss()};
                 case ColMaxEpss:   return r.cves.empty() ? QVariant{} : QVariant{r.max_epss()};
                 case ColVerified:  return r.has_verified_cve() ? "✓" : "";
+                case ColJA4S:      return QString::fromStdString(r.fingerprint.ja4s);
+                case ColJA4X:      return QString::fromStdString(r.fingerprint.ja4x);
+                case ColCDN:       return QString::fromStdString(r.fingerprint.cdn);
+                case ColOS:        return QString::fromStdString(r.fingerprint.os_guess);
                 default:           return {};
             }
         }

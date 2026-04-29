@@ -31,6 +31,8 @@ inline std::vector<core::ScanResult> make_dummy_results() {
         r.service.extra_info = "Ubuntu 18.04";
         r.service.banner_raw = "SSH-2.0-OpenSSH_7.4";
 
+        r.fingerprint.os_guess = "Linux 4.15 (Ubuntu 18.04)";
+
         CveInfo cve;
         cve.cve_id          = "CVE-2018-15473";
         cve.description     = "OpenSSH user enumeration vulnerability";
@@ -59,6 +61,11 @@ inline std::vector<core::ScanResult> make_dummy_results() {
         r.service.version    = "2.4.29";
         r.service.extra_info = "Ubuntu";
         r.service.banner_raw = "HTTP/1.1 200 OK\r\nServer: Apache/2.4.29 (Ubuntu)";
+
+        r.fingerprint.ja4s     = "t13d1516h2_8daaf6152771_02713d6af862";
+        r.fingerprint.ja4x     = "a]550r7_1f92a51_4d2155a022b2";
+        r.fingerprint.cdn      = "Cloudflare";
+        r.fingerprint.os_guess = "Linux 4.15 (Ubuntu 18.04)";
 
         CveInfo cve1;
         cve1.cve_id      = "CVE-2019-0211";
@@ -96,6 +103,8 @@ inline std::vector<core::ScanResult> make_dummy_results() {
         r.service.extra_info = "Ubuntu 18.04";
         r.service.banner_raw = "5.7.32-0ubuntu0.18.04.1";
 
+        r.fingerprint.os_guess = "Linux 4.15 (Ubuntu 18.04)";
+
         CveInfo cve;
         cve.cve_id      = "CVE-2020-14812";
         cve.description = "MySQL Server Optimizer DoS vulnerability";
@@ -122,6 +131,8 @@ inline std::vector<core::ScanResult> make_dummy_results() {
         r.service.version    = "6.0.16";
         r.service.extra_info = "Linux 5.4.0, no auth";
         r.service.banner_raw = "# Server\r\nredis_version:6.0.16\r\nos:Linux 5.4.0";
+
+        r.fingerprint.os_guess = "Linux 5.4.0";
 
         CveInfo cve;
         cve.cve_id          = "CVE-2022-0543";

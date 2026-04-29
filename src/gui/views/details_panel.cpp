@@ -37,6 +37,26 @@ void DetailsPanel::showResult(const core::ScanResult& r) {
         html += "</pre><br>";
     }
 
+    // Fingerprint section
+    const auto& fp = r.fingerprint;
+    if (!fp.ja4s.empty() || !fp.ja4x.empty() || !fp.cdn.empty() || !fp.os_guess.empty()) {
+        html += "<h4>Fingerprint</h4>";
+        html += "<div style='padding:6px; background:#252525; border-radius:4px; margin-bottom:8px;'>";
+        if (!fp.ja4s.empty())
+            html += QString("<b>JA4S:</b> <code>%1</code><br>")
+                .arg(QString::fromStdString(fp.ja4s).toHtmlEscaped());
+        if (!fp.ja4x.empty())
+            html += QString("<b>JA4X:</b> <code>%1</code><br>")
+                .arg(QString::fromStdString(fp.ja4x).toHtmlEscaped());
+        if (!fp.cdn.empty())
+            html += QString("<b>CDN:</b> %1<br>")
+                .arg(QString::fromStdString(fp.cdn).toHtmlEscaped());
+        if (!fp.os_guess.empty())
+            html += QString("<b>OS:</b> %1<br>")
+                .arg(QString::fromStdString(fp.os_guess).toHtmlEscaped());
+        html += "</div>";
+    }
+
     // CVE list
     if (!r.cves.empty()) {
         html += "<h4>Vulnerabilities</h4>";
