@@ -20,6 +20,8 @@ add_executable(spscan-proto
     src/gui/views/cvss_delegate.cpp
     src/gui/views/main_window.hpp
     src/gui/views/main_window.cpp
+    src/gui/views/details_panel.hpp
+    src/gui/views/details_panel.cpp
 )
 
 target_include_directories(spscan-proto PRIVATE
