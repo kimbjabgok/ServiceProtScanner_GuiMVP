@@ -5,10 +5,12 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
 
 #include "result_model.hpp"
 #include "cvss_delegate.hpp"
+#include "export_actions.hpp"
 #include "dummy_data.hpp"
 
 namespace sps::gui {
@@ -47,10 +49,17 @@ private:
         auto* delegate = new CvssDelegate(this);
         table_->setItemDelegateForColumn(ResultModel::ColMaxCvss, delegate);
 
+        auto* btn_export = new QPushButton("Export Report");
+        btn_export->setMinimumHeight(40);
+        connect(btn_export, &QPushButton::clicked, this, [this]() {
+            ExportActions::exportResults(this, model_->allResults());
+        });
+
         auto* central = new QWidget;
         auto* layout = new QVBoxLayout(central);
         layout->addWidget(new QLabel("Scan Results"));
         layout->addWidget(table_, 1);
+        layout->addWidget(btn_export);
         setCentralWidget(central);
     }
 
