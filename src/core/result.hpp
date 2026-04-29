@@ -2,8 +2,8 @@
 // ============================================================
 //  src/core/result.hpp  —  ScanResult 구조체 (Qt 비의존 POD)
 //
-//  [제안] 김병옥 — GUI Views(#6) 모듈 담당
 //  모든 모듈이 이 구조체를 공용으로 사용.
+
 //  GUI model, CLI output, JSON/HTML/CSV export 모두
 //  이 구조체 하나만 주고받음.
 // ============================================================
@@ -47,8 +47,8 @@ struct CveInfo {
 
 // ── 서비스 식별 결과 ─────────────────────────────
 struct ServiceInfo {
-    std::string name;       // "http", "ssh", "mysql", "redis", ...
-    std::string product;    // "OpenSSH", "MySQL", "Redis", ...
+    std::string name;       // "http", "ssh", ...
+    std::string product;    // "OpenSSH", ...
     std::string version;    // "7.4", "5.7.32", "6.0.16", ...
     std::string extra_info; // OS 정보 등 부가 ("Ubuntu", "Debian")
     std::string banner_raw; // raw banner (8KB cap, truncated)
@@ -103,4 +103,4 @@ struct ScanResult {
     }
 };
 
-} // namespace sps::core
+} 
