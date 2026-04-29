@@ -6,11 +6,13 @@
 #include <QHeaderView>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
 
 #include "result_model.hpp"
 #include "cvss_delegate.hpp"
 #include "details_panel.hpp"
+#include "export_actions.hpp"
 #include "dummy_data.hpp"
 
 namespace sps::gui {
@@ -55,6 +57,12 @@ private:
 
         detail_ = new DetailsPanel(this);
 
+        auto* btn_export = new QPushButton("Export Report");
+        btn_export->setMinimumHeight(40);
+        connect(btn_export, &QPushButton::clicked, this, [this]() {
+            ExportActions::exportResults(this, model_->allResults());
+        });
+
         auto* left = new QWidget;
         auto* leftLayout = new QVBoxLayout(left);
         leftLayout->setContentsMargins(0, 0, 0, 0);
@@ -65,6 +73,7 @@ private:
         auto* rightLayout = new QVBoxLayout(right);
         rightLayout->addWidget(new QLabel("Details"));
         rightLayout->addWidget(detail_, 1);
+        rightLayout->addWidget(btn_export);
 
         auto* splitter = new QSplitter(Qt::Horizontal);
         splitter->addWidget(left);
