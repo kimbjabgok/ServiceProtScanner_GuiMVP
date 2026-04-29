@@ -14,6 +14,7 @@ public:
 
 private:
     static QString cvss_html_color(float score);
+    static QString epss_html_color(double epss);
 };
 
 } // namespace sps::gui

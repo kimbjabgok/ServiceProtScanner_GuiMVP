@@ -18,6 +18,10 @@ add_executable(spscan-proto
     src/gui/views/result_model.cpp
     src/gui/views/cvss_delegate.hpp
     src/gui/views/cvss_delegate.cpp
+    src/gui/views/epss_delegate.hpp
+    src/gui/views/epss_delegate.cpp
+    src/gui/views/risk_delegate.hpp
+    src/gui/views/risk_delegate.cpp
     src/gui/views/main_window.hpp
     src/gui/views/main_window.cpp
     src/gui/views/details_panel.hpp

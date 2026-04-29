@@ -2,32 +2,30 @@
 
 #include <QPainter>
 #include <QStyledItemDelegate>
+#include <QtGlobal>
 #include <algorithm>
 #include "result_model.hpp"
 
 namespace sps::gui {
 
-class CvssDelegate : public QStyledItemDelegate {
+class EpssDelegate : public QStyledItemDelegate {
     Q_OBJECT
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override {
-        if (index.column() != ResultModel::ColMaxCvss) {
+        if (index.column() != ResultModel::ColMaxEpss) {
             QStyledItemDelegate::paint(painter, option, index);
             return;
         }
-
         const QVariant val = index.data(Qt::UserRole);
         if (!val.isValid()) {
             QStyledItemDelegate::paint(painter, option, index);
             return;
         }
-
-        const float cvss = val.toFloat();
-        const QColor bg = cvss_color(cvss);
-
+        const double epss = val.toDouble();
+        QColor bg = epss_color(epss);
         painter->save();
         painter->fillRect(option.rect, bg);
         painter->setPen(QColor(255, 255, 255));
@@ -35,7 +33,7 @@ public:
         font.setBold(true);
         painter->setFont(font);
         painter->drawText(option.rect, Qt::AlignCenter,
-                          QString::number(cvss, 'f', 1));
+                          QString::number(qRound(epss * 100.0)) + "%");
         painter->restore();
     }
 
@@ -47,12 +45,10 @@ public:
     }
 
 private:
-    static QColor cvss_color(float score) {
-        if (score >= 9.0f) return QColor(180, 30, 30);
-        if (score >= 7.0f) return QColor(200, 120, 20);
-        if (score >= 4.0f) return QColor(180, 170, 30);
-        if (score >  0.0f) return QColor(80, 80, 80);
-        return QColor(50, 50, 50);
+    static QColor epss_color(double score) {
+        if (score >= 0.50) return QColor(180, 30, 30);
+        if (score >= 0.10) return QColor(180, 170, 30);
+        return QColor(30, 140, 30);
     }
 };
 

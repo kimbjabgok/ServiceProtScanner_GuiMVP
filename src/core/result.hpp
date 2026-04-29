@@ -1,11 +1,8 @@
 #pragma once
 // ============================================================
-//  src/core/result.hpp  —  ScanResult 구조체 (Qt 비의존 POD)
+//  src/core/result.hpp -- ScanResult shared POD types
 //
-//  모든 모듈이 이 구조체를 공용으로 사용.
-
-//  GUI model, CLI output, JSON/HTML/CSV export 모두
-//  이 구조체 하나만 주고받음.
+//  Used by GUI model, CLI output, and report exporters.
 // ============================================================
 
 #include <chrono>
@@ -15,15 +12,13 @@
 
 namespace sps::core {
 
-// ── 포트 상태 ────────────────────────────────────
 enum class PortState : uint8_t {
-    Open,       // 응답 받음
-    Closed,     // RST 받음
-    Filtered,   // 타임아웃 / ICMP unreachable
+    Open,
+    Closed,
+    Filtered,
     Unknown
 };
 
-// ── 심각도 (CVSS 기반) ───────────────────────────
 enum class Severity : uint8_t {
     Critical,   // CVSS >= 9.0
     High,       // CVSS >= 7.0
@@ -32,48 +27,44 @@ enum class Severity : uint8_t {
     None
 };
 
-// ── CVE 정보 ─────────────────────────────────────
 struct CveInfo {
     std::string cve_id;         // "CVE-2018-15473"
-    std::string description;    // NVD 설명 (영문)
+    std::string description;    // NVD description
     float       cvss_score{0};  // 0.0 ~ 10.0
     Severity    severity{Severity::None};
 
-    // ── 본인 제안 필드 ──
-    float       epss_score{0};          // 0.0 ~ 1.0  (FIRST EPSS API)
-    bool        nuclei_verified{false}; // nuclei PoC 검증 여부
-    std::string nuclei_template_id;     // e.g. "CVE-2018-15473"
+    double      epss_score{0};          // 0.0 ~ 1.0  (FIRST EPSS API사용)
+    bool        nuclei_verified{false}; // proposed - unconfirmed
+    std::string nuclei_template_id;     // proposed - unconfirmed
 };
 
-// ── 서비스 식별 결과 ─────────────────────────────
 struct ServiceInfo {
     std::string name;       // "http", "ssh", ...
     std::string product;    // "OpenSSH", ...
     std::string version;    // "7.4", "5.7.32", "6.0.16", ...
-    std::string extra_info; // OS 정보 등 부가 ("Ubuntu", "Debian")
+    std::string extra_info; // OS details or other service info
     std::string banner_raw; // raw banner (8KB cap, truncated)
 };
 
-// ── 스캔 결과 (핵심 구조체) ──────────────────────
 struct ScanResult {
-    // ── 대상 정보 ──
-    std::string target_host;    // IP 또는 hostname
-    std::string resolved_ip;    // DNS resolve 결과 (hostname일 때)
+    std::string target_host;    // IP or hostname
+    std::string resolved_ip;    // DNS result
     uint16_t    port{0};
     std::string protocol;       // "tcp" / "udp"
     PortState   state{PortState::Unknown};
 
-    // ── 서비스 식별 (probe 결과) ──
     ServiceInfo service;
 
-    // ── 취약점 정보 (CVE lookup 결과) ──
+    std::string ja4s;       // JA4S server fingerprint (TLS ServerHello)
+    std::string ja4x;       // JA4X certificate fingerprint
+    std::string cdn;        // CDN/WAF tag ("cloudflare", "akamai", ...)
+    std::string os_guess;   // OS guess ("Linux 5.x", "Windows 10", ...)
+
     std::vector<CveInfo> cves;
 
-    // ── 타이밍 ──
     std::chrono::system_clock::time_point timestamp;
-    std::chrono::milliseconds rtt{0};   // 응답 시간
+    std::chrono::milliseconds rtt{0};
 
-    // ── 편의 메서드 ──
     [[nodiscard]] bool is_open() const noexcept {
         return state == PortState::Open;
     }
@@ -84,9 +75,18 @@ struct ScanResult {
         return m;
     }
 
-    [[nodiscard]] float max_epss() const noexcept {
-        float m = 0;
+    [[nodiscard]] double max_epss() const noexcept {
+        double m = 0;
         for (const auto& c : cves) m = (c.epss_score > m) ? c.epss_score : m;
+        return m;
+    }
+
+    [[nodiscard]] double max_risk() const noexcept {
+        double m = 0;
+        for (const auto& c : cves) {
+            double risk = static_cast<double>(c.cvss_score) * c.epss_score;
+            if (risk > m) m = risk;
+        }
         return m;
     }
 
@@ -103,4 +103,4 @@ struct ScanResult {
     }
 };
 
-} 
+} // namespace sps::core

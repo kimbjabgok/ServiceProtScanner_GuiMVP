@@ -9,25 +9,15 @@ namespace sps::gui {
 class ResultModel : public QAbstractTableModel {
     Q_OBJECT
 public:
-    // 컬럼 정의
     enum Column {
-        ColPort = 0,
-        ColProtocol,
-        ColState,
-        ColService,
-        ColProduct,
-        ColVersion,
-        ColCveCount,
-        ColMaxCvss,
-        ColMaxEpss,
-        ColVerified,
-        ColCount        // 총 컬럼 수
+        ColPort = 0, ColProtocol, ColState, ColService, ColProduct, ColVersion,
+        ColCveCount, ColMaxCvss, ColMaxEpss, ColRisk,
+        ColJa4s, ColCdn, ColOs,
+        ColCount
     };
 
     explicit ResultModel(QObject* parent = nullptr)
         : QAbstractTableModel(parent) {}
-
-    // ── QAbstractTableModel 필수 구현 ──
 
     int rowCount(const QModelIndex& = {}) const override {
         return static_cast<int>(results_.size());
@@ -52,7 +42,10 @@ public:
             case ColCveCount:  return "CVEs";
             case ColMaxCvss:   return "CVSS";
             case ColMaxEpss:   return "EPSS";
-            case ColVerified:  return "Verified";
+            case ColRisk:      return "Risk";
+            case ColJa4s:      return "JA4S";
+            case ColCdn:       return "CDN";
+            case ColOs:        return "OS";
             default:           return {};
         }
     }
@@ -74,25 +67,27 @@ public:
                 case ColCveCount:  return static_cast<int>(r.cves.size());
                 case ColMaxCvss:   return r.cves.empty() ? QVariant{} : QVariant{r.max_cvss()};
                 case ColMaxEpss:   return r.cves.empty() ? QVariant{} : QVariant{r.max_epss()};
-                case ColVerified:  return r.has_verified_cve() ? "✓" : "";
+                case ColRisk:      return r.cves.empty() ? QVariant{} : QVariant{QString::number(r.max_risk(), 'f', 2)};
+                case ColJa4s:      return QString::fromStdString(r.ja4s);
+                case ColCdn:       return QString::fromStdString(r.cdn);
+                case ColOs:        return QString::fromStdString(r.os_guess);
                 default:           return {};
             }
         }
 
-        // UserRole: CVSS Delegate가 색상 결정에 사용
         if (role == Qt::UserRole && index.column() == ColMaxCvss) {
             return r.max_cvss();
         }
         if (role == Qt::UserRole && index.column() == ColMaxEpss) {
             return r.max_epss();
         }
+        if (role == Qt::UserRole && index.column() == ColRisk) {
+            return r.max_risk();
+        }
 
         return {};
     }
 
-    // ── 데이터 조작 ──
-
-    // 한 행 추가 (백엔드 → GUI 실시간 갱신용)
     void appendResult(core::ScanResult result) {
         int row = static_cast<int>(results_.size());
         beginInsertRows({}, row, row);
@@ -100,19 +95,16 @@ public:
         endInsertRows();
     }
 
-    // 배치 추가 (더미 데이터 로드용)
     void setResults(std::vector<core::ScanResult> results) {
         beginResetModel();
         results_ = std::move(results);
         endResetModel();
     }
 
-    // 특정 행의 ScanResult 접근 (Details Panel용)
     const core::ScanResult& resultAt(int row) const {
         return results_.at(row);
     }
 
-    // 전체 결과 접근 (Export / Charts용)
     const std::vector<core::ScanResult>& allResults() const {
         return results_;
     }

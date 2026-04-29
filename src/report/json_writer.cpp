@@ -52,6 +52,11 @@ std::string JsonWriter::write(const std::vector<core::ScanResult>& results) {
            << "    \"rtt_ms\": " << r.rtt.count() << ",\n"
            << "    \"max_cvss\": " << r.max_cvss() << ",\n"
            << "    \"max_epss\": " << r.max_epss() << ",\n"
+           << "    \"max_risk\": " << r.max_risk() << ",\n"
+           << "    \"ja4s\": \"" << json_escape(r.ja4s) << "\",\n"
+           << "    \"ja4x\": \"" << json_escape(r.ja4x) << "\",\n"
+           << "    \"cdn\": \"" << json_escape(r.cdn) << "\",\n"
+           << "    \"os_guess\": \"" << json_escape(r.os_guess) << "\",\n"
            << "    \"cves\": [";
 
         for (size_t j = 0; j < r.cves.size(); ++j) {

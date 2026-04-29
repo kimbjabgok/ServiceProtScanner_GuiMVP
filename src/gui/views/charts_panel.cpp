@@ -2,87 +2,101 @@
 
 #include <QPainter>
 #include <QVBoxLayout>
-#include <QtCharts/QBarCategoryAxis>
-#include <QtCharts/QBarSet>
-#include <QtCharts/QStackedBarSeries>
+#include <QtCharts/QScatterSeries>
 #include <QtCharts/QValueAxis>
-
-#include <algorithm>
 
 namespace sps::gui {
 
-ChartsPanel::ChartsPanel(QWidget* parent) : QWidget(parent) {
-    chart_ = new QChart;
-    chart_->setTitle("CVSS Score Distribution");
-    chart_->setTheme(QChart::ChartThemeDark);
-    chart_->setAnimationOptions(QChart::SeriesAnimations);
+namespace {
 
-    chart_view_ = new QChartView(chart_);
-    chart_view_->setRenderHint(QPainter::Antialiasing);
+bool is_probe_result(const core::ScanResult& r) {
+    const auto& service = r.service.name;
+    return service == "ssh" ||
+           service == "http" ||
+           service == "https" ||
+           service == "ftp" ||
+           service == "smtp";
+}
+
+QScatterSeries* make_series(const QString& name, const QColor& color) {
+    auto* series = new QScatterSeries;
+    series->setName(name);
+    series->setMarkerSize(12.0);
+    series->setColor(color);
+    series->setBorderColor(QColor(255, 255, 255));
+    return series;
+}
+
+QScatterSeries* series_for_risk(double risk,
+                                QScatterSeries* critical,
+                                QScatterSeries* high,
+                                QScatterSeries* medium,
+                                QScatterSeries* low) {
+    if (risk >= 7.0) return critical;
+    if (risk >= 3.0) return high;
+    if (risk >= 1.0) return medium;
+    return low;
+}
+
+} // namespace
+
+ChartsPanel::ChartsPanel(QWidget* parent) : QWidget(parent) {
+    matrix_ = new QChart;
+    matrix_->setTitle("Risk Priority Matrix (CVSS x EPSS)");
+    matrix_->setTheme(QChart::ChartThemeDark);
+    matrix_->setAnimationOptions(QChart::SeriesAnimations);
+    matrix_->setMargins(QMargins(12, 18, 18, 12));
+    matrix_->legend()->setVisible(true);
+    matrix_->legend()->setAlignment(Qt::AlignRight);
+
+    matrix_view_ = new QChartView(matrix_);
+    matrix_view_->setRenderHint(QPainter::Antialiasing);
+    matrix_view_->setMinimumHeight(260);
 
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(chart_view_, 1);
+    layout->addWidget(matrix_view_, 1);
 }
 
 void ChartsPanel::updateData(const std::vector<core::ScanResult>& results) {
-    chart_->removeAllSeries();
-    for (auto* axis : chart_->axes()) chart_->removeAxis(axis);
+    matrix_->removeAllSeries();
+    for (auto* axis : matrix_->axes()) matrix_->removeAxis(axis);
 
-    int critical = 0;
-    int high = 0;
-    int medium = 0;
-    int low = 0;
+    auto* critical = make_series("Critical", QColor(180, 30, 30));
+    auto* high = make_series("High", QColor(200, 120, 20));
+    auto* medium = make_series("Medium", QColor(180, 170, 30));
+    auto* low = make_series("Low", QColor(80, 80, 80));
 
     for (const auto& r : results) {
-        for (const auto& cve : r.cves) {
-            if (cve.cvss_score >= 9.0f) ++critical;
-            else if (cve.cvss_score >= 7.0f) ++high;
-            else if (cve.cvss_score >= 4.0f) ++medium;
-            else if (cve.cvss_score > 0.0f) ++low;
-        }
+        if (!is_probe_result(r) || r.cves.empty()) continue;
+
+        auto* series = series_for_risk(r.max_risk(), critical, high, medium, low);
+        series->append(r.max_epss(), r.max_cvss());
     }
 
-    auto* setCritical = new QBarSet("Critical (>=9.0)");
-    setCritical->setColor(QColor(180, 30, 30));
-    *setCritical << critical << 0 << 0 << 0;
+    matrix_->addSeries(critical);
+    matrix_->addSeries(high);
+    matrix_->addSeries(medium);
+    matrix_->addSeries(low);
 
-    auto* setHigh = new QBarSet("High (>=7.0)");
-    setHigh->setColor(QColor(200, 120, 20));
-    *setHigh << 0 << high << 0 << 0;
-
-    auto* setMedium = new QBarSet("Medium (>=4.0)");
-    setMedium->setColor(QColor(180, 170, 30));
-    *setMedium << 0 << 0 << medium << 0;
-
-    auto* setLow = new QBarSet("Low (<4.0)");
-    setLow->setColor(QColor(80, 80, 80));
-    *setLow << 0 << 0 << 0 << low;
-
-    auto* series = new QStackedBarSeries;
-    series->append(setCritical);
-    series->append(setHigh);
-    series->append(setMedium);
-    series->append(setLow);
-    series->setBarWidth(0.6);
-    chart_->addSeries(series);
-
-    auto* axisX = new QBarCategoryAxis;
-    axisX->append({"Critical", "High", "Medium", "Low"});
-    chart_->addAxis(axisX, Qt::AlignBottom);
-    series->attachAxis(axisX);
+    auto* axisX = new QValueAxis;
+    axisX->setRange(0.0, 1.0);
+    axisX->setTickCount(5);
+    axisX->setLabelFormat("%.1f");
+    axisX->setTitleText("EPSS (Exploit Probability)");
+    matrix_->addAxis(axisX, Qt::AlignBottom);
 
     auto* axisY = new QValueAxis;
-    axisY->setTitleText("Count");
-    const int maxVal = std::max({critical, high, medium, low});
-    axisY->setRange(0, maxVal + 1);
-    axisY->setLabelFormat("%d");
-    chart_->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
+    axisY->setRange(0.0, 10.0);
+    axisY->setTickCount(5);
+    axisY->setLabelFormat("%.1f");
+    axisY->setTitleText("CVSS Score");
+    matrix_->addAxis(axisY, Qt::AlignLeft);
 
-    chart_->legend()->setVisible(true);
-    chart_->legend()->setAlignment(Qt::AlignRight);
-    chart_->legend()->setFont(QFont("sans", 9));
+    for (auto* series : matrix_->series()) {
+        series->attachAxis(axisX);
+        series->attachAxis(axisY);
+    }
 }
 
 } // namespace sps::gui

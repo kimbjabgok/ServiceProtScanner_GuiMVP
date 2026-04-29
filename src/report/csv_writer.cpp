@@ -27,7 +27,7 @@ static const char* state_str(core::PortState s) {
 std::string CsvWriter::write(const std::vector<core::ScanResult>& results) {
     std::ostringstream ss;
     ss << std::fixed << std::setprecision(2);
-    ss << "Host,Port,Protocol,State,Service,Product,Version,RTT(ms),CVE Count,Max CVSS,Max EPSS\n";
+    ss << "Host,Port,Protocol,State,Service,Product,Version,RTT(ms),CVE Count,Max CVSS,Max EPSS,Max Risk,JA4S,CDN,OS\n";
 
     for (const auto& r : results) {
         ss << csv_escape(r.target_host) << ","
@@ -40,7 +40,11 @@ std::string CsvWriter::write(const std::vector<core::ScanResult>& results) {
            << r.rtt.count() << ","
            << r.cves.size() << ","
            << r.max_cvss() << ","
-           << r.max_epss() << "\n";
+           << r.max_epss() << ","
+           << r.max_risk() << ","
+           << csv_escape(r.ja4s) << ","
+           << csv_escape(r.cdn) << ","
+           << csv_escape(r.os_guess) << "\n";
     }
 
     return ss.str();

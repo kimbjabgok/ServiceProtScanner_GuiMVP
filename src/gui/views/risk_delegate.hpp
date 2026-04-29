@@ -7,52 +7,47 @@
 
 namespace sps::gui {
 
-class CvssDelegate : public QStyledItemDelegate {
+class RiskDelegate : public QStyledItemDelegate {
     Q_OBJECT
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override {
-        if (index.column() != ResultModel::ColMaxCvss) {
+        if (index.column() != ResultModel::ColRisk) {
             QStyledItemDelegate::paint(painter, option, index);
             return;
         }
-
         const QVariant val = index.data(Qt::UserRole);
         if (!val.isValid()) {
             QStyledItemDelegate::paint(painter, option, index);
             return;
         }
-
-        const float cvss = val.toFloat();
-        const QColor bg = cvss_color(cvss);
-
+        const double risk = val.toDouble();
+        QColor bg = risk_color(risk);
         painter->save();
         painter->fillRect(option.rect, bg);
         painter->setPen(QColor(255, 255, 255));
         QFont font = painter->font();
         font.setBold(true);
         painter->setFont(font);
-        painter->drawText(option.rect, Qt::AlignCenter,
-                          QString::number(cvss, 'f', 1));
+        painter->drawText(option.rect, Qt::AlignCenter, QString::number(risk, 'f', 2));
         painter->restore();
     }
 
     QSize sizeHint(const QStyleOptionViewItem& option,
                    const QModelIndex& index) const override {
         auto s = QStyledItemDelegate::sizeHint(option, index);
-        s.setWidth(std::max(s.width(), 60));
+        s.setWidth(std::max(s.width(), 70));
         return s;
     }
 
 private:
-    static QColor cvss_color(float score) {
-        if (score >= 9.0f) return QColor(180, 30, 30);
-        if (score >= 7.0f) return QColor(200, 120, 20);
-        if (score >= 4.0f) return QColor(180, 170, 30);
-        if (score >  0.0f) return QColor(80, 80, 80);
-        return QColor(50, 50, 50);
+    static QColor risk_color(double score) {
+        if (score >= 7.0) return QColor(180, 30, 30);
+        if (score >= 3.0) return QColor(200, 120, 20);
+        if (score >= 1.0) return QColor(180, 170, 30);
+        return QColor(80, 80, 80);
     }
 };
 

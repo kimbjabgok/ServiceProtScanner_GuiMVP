@@ -14,8 +14,8 @@ public:
     void updateData(const std::vector<core::ScanResult>& results);
 
 private:
-    QChartView* chart_view_ = nullptr;
-    QChart*     chart_      = nullptr;
+    QChartView* matrix_view_ = nullptr;
+    QChart*     matrix_      = nullptr;
 };
 
 } // namespace sps::gui

@@ -11,7 +11,10 @@
 
 #include "result_model.hpp"
 #include "cvss_delegate.hpp"
+#include "epss_delegate.hpp"
+#include "risk_delegate.hpp"
 #include "details_panel.hpp"
+#include "charts_panel.hpp"
 #include "export_actions.hpp"
 #include "dummy_data.hpp"
 
@@ -34,6 +37,7 @@ private:
     QSortFilterProxyModel*  proxy_  = nullptr;
     QTableView*             table_  = nullptr;
     DetailsPanel*           detail_ = nullptr;
+    ChartsPanel*            charts_ = nullptr;
 
     void setup_ui() {
         model_ = new ResultModel(this);
@@ -51,11 +55,17 @@ private:
 
         auto* delegate = new CvssDelegate(this);
         table_->setItemDelegateForColumn(ResultModel::ColMaxCvss, delegate);
+        auto* epss_del = new EpssDelegate(this);
+        table_->setItemDelegateForColumn(ResultModel::ColMaxEpss, epss_del);
+        auto* risk_del = new RiskDelegate(this);
+        table_->setItemDelegateForColumn(ResultModel::ColRisk, risk_del);
+        table_->sortByColumn(ResultModel::ColRisk, Qt::DescendingOrder);
 
         connect(table_->selectionModel(), &QItemSelectionModel::currentRowChanged,
                 this, &MainWindow::on_row_selected);
 
         detail_ = new DetailsPanel(this);
+        charts_ = new ChartsPanel(this);
 
         auto* btn_export = new QPushButton("Export Report");
         btn_export->setMinimumHeight(40);
@@ -68,6 +78,8 @@ private:
         leftLayout->setContentsMargins(0, 0, 0, 0);
         leftLayout->addWidget(new QLabel("Scan Results"));
         leftLayout->addWidget(table_, 1);
+        leftLayout->addWidget(new QLabel("Risk Priority Matrix (CVSS x EPSS)"));
+        leftLayout->addWidget(charts_, 0);
 
         auto* right = new QWidget;
         auto* rightLayout = new QVBoxLayout(right);
@@ -86,6 +98,8 @@ private:
 
     void load_dummy_data() {
         model_->setResults(sps::test::make_dummy_results());
+        charts_->updateData(model_->allResults());
+        table_->sortByColumn(ResultModel::ColRisk, Qt::DescendingOrder);
     }
 
     void on_row_selected(const QModelIndex& current) {
@@ -95,4 +109,4 @@ private:
     }
 };
 
-} // namespace sps::gui
+} 

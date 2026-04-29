@@ -52,7 +52,8 @@ std::string HtmlWriter::write(const std::vector<core::ScanResult>& results) {
        << "<p>Total hosts scanned: results contain " << results.size() << " entries</p>\n"
        << "<table>\n<tr>"
        << "<th>Port</th><th>Proto</th><th>State</th><th>Service</th>"
-       << "<th>Product</th><th>Version</th><th>CVEs</th><th>Max CVSS</th><th>Vulnerabilities</th>"
+       << "<th>Product</th><th>Version</th><th>CVEs</th><th>Max CVSS</th>"
+       << "<th>EPSS</th><th>Risk</th><th>CDN</th><th>OS</th><th>Vulnerabilities</th>"
        << "</tr>\n";
 
     for (const auto& r : results) {
@@ -72,6 +73,10 @@ std::string HtmlWriter::write(const std::vector<core::ScanResult>& results) {
            << "<td>" << html_escape(r.service.version) << "</td>"
            << "<td>" << r.cves.size() << "</td>"
            << "<td class='" << css << "'>" << cvss << "</td>"
+           << "<td>" << r.max_epss() << "</td>"
+           << "<td>" << r.max_risk() << "</td>"
+           << "<td>" << html_escape(r.cdn) << "</td>"
+           << "<td>" << html_escape(r.os_guess) << "</td>"
            << "<td>";
 
         for (const auto& cve : r.cves) {
@@ -83,7 +88,8 @@ std::string HtmlWriter::write(const std::vector<core::ScanResult>& results) {
 
             ss << "<div class='cve-block " << cve_css << "'>"
                << "<b>" << html_escape(cve.cve_id) << "</b> "
-               << "(CVSS: " << cve.cvss_score << ")"
+               << "(CVSS: " << cve.cvss_score << " | EPSS: "
+               << static_cast<int>(cve.epss_score * 100) << "%)"
                << "</div>";
         }
 
