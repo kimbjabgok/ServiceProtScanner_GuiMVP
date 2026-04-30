@@ -10,9 +10,18 @@ class ResultModel : public QAbstractTableModel {
     Q_OBJECT
 public:
     enum Column {
-        ColPort = 0, ColProtocol, ColState, ColService, ColProduct, ColVersion,
-        ColCveCount, ColMaxCvss, ColMaxEpss, ColRisk,
-        ColJa4s, ColCdn, ColOs,
+        ColPort = 0,
+        ColService,
+        ColProduct,
+        ColRisk,
+        ColMaxCvss,
+        ColMaxEpss,
+        ColCveCount,
+        ColVersion,
+        ColJa4s,
+        ColJa4x,
+        ColCdn,
+        ColOs,
         ColCount
     };
 
@@ -34,16 +43,15 @@ public:
 
         switch (static_cast<Column>(section)) {
             case ColPort:      return "Port";
-            case ColProtocol:  return "Proto";
-            case ColState:     return "State";
             case ColService:   return "Service";
             case ColProduct:   return "Product";
-            case ColVersion:   return "Version";
-            case ColCveCount:  return "CVEs";
+            case ColRisk:      return "Risk";
             case ColMaxCvss:   return "CVSS";
             case ColMaxEpss:   return "EPSS";
-            case ColRisk:      return "Risk";
+            case ColCveCount:  return "CVEs";
+            case ColVersion:   return "Version";
             case ColJa4s:      return "JA4S";
+            case ColJa4x:      return "JA4X";
             case ColCdn:       return "CDN";
             case ColOs:        return "OS";
             default:           return {};
@@ -59,16 +67,15 @@ public:
         if (role == Qt::DisplayRole) {
             switch (static_cast<Column>(index.column())) {
                 case ColPort:      return r.port;
-                case ColProtocol:  return QString::fromStdString(r.protocol);
-                case ColState:     return state_str(r.state);
                 case ColService:   return QString::fromStdString(r.service.name);
                 case ColProduct:   return QString::fromStdString(r.service.product);
-                case ColVersion:   return QString::fromStdString(r.service.version);
-                case ColCveCount:  return static_cast<int>(r.cves.size());
+                case ColRisk:      return r.cves.empty() ? QVariant{} : QVariant{QString::number(r.max_risk(), 'f', 2)};
                 case ColMaxCvss:   return r.cves.empty() ? QVariant{} : QVariant{r.max_cvss()};
                 case ColMaxEpss:   return r.cves.empty() ? QVariant{} : QVariant{r.max_epss()};
-                case ColRisk:      return r.cves.empty() ? QVariant{} : QVariant{QString::number(r.max_risk(), 'f', 2)};
+                case ColCveCount:  return static_cast<int>(r.cves.size());
+                case ColVersion:   return QString::fromStdString(r.service.version);
                 case ColJa4s:      return QString::fromStdString(r.ja4s);
+                case ColJa4x:      return QString::fromStdString(r.ja4x);
                 case ColCdn:       return QString::fromStdString(r.cdn);
                 case ColOs:        return QString::fromStdString(r.os_guess);
                 default:           return {};
