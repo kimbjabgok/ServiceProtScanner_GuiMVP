@@ -8,7 +8,8 @@ namespace sps::report {
 
 class CsvWriter {
 public:
-    static std::string write(const std::vector<core::ScanResult>& results);
+    static void write(const std::string& path,
+                      const std::vector<sps::core::ScanResult>& results);
 };
 
 } // namespace sps::report
