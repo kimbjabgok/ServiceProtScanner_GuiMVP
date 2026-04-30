@@ -82,6 +82,7 @@ public:
             }
         }
 
+        // CVSS 컬럼의 UserRole 요청이 들어오면 r.max_cvss()를 반환. epss와 risk도 마찬가지.
         if (role == Qt::UserRole && index.column() == ColMaxCvss) {
             return r.max_cvss();
         }

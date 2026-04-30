@@ -24,8 +24,10 @@ add_executable(spscan-proto
     src/gui/views/risk_delegate.cpp
     src/gui/views/main_window.hpp
     src/gui/views/main_window.cpp
+    src/gui/views/main_window.ui
     src/gui/views/details_panel.hpp
     src/gui/views/details_panel.cpp
+    src/gui/views/details_panel.ui
     src/gui/views/charts_panel.hpp
     src/gui/views/charts_panel.cpp
     src/gui/views/export_actions.hpp
