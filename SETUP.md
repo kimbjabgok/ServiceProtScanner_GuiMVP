@@ -28,20 +28,24 @@ export VCPKG_ROOT=/path/to/vcpkg
 
 ## 2. 빌드
 
-### 방법 A: CMake Preset (추천)
-
-```bash
-cmake --preset default
-cmake --build build/default --parallel
-```
-
-### 방법 B: Qt Creator
+### 방법 A: Qt Creator (개발 추천)
 
 1. Qt Creator에서 `CMakeLists.txt` 열기
 2. **첫 Configure 전에** Kit 설정 → CMake 변수 추가:
    - `CMAKE_TOOLCHAIN_FILE` = `%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake`
 3. Configure 후에 추가하면 무시되므로, 이미 Configure 했다면 빌드 디렉터리 삭제 후 재시작
 4. Build 버튼 클릭
+
+Qt GUI 개발 중에는 `.ui` 파일, Kit, 디버깅, 실행 설정을 함께 관리할 수 있으므로 Qt Creator 방식이 가장 편합니다.
+
+### 방법 B: CMake Preset (터미널/CI 추천)
+
+```bash
+cmake --preset default
+cmake --build build/default --parallel
+```
+
+터미널 빌드, CI, 팀 공통 재현 빌드에는 CMake Preset을 권장합니다.
 
 ### 방법 C: vcpkg 없이 (시스템 패키지만)
 
@@ -50,7 +54,7 @@ cmake --preset no-vcpkg
 cmake --build build/no-vcpkg --parallel
 ```
 
-이 경우 Boost, OpenSSL 등을 시스템에 직접 설치해야 함.
+이 경우 Boost, OpenSSL 등을 시스템에 직접 설치해야 합니다.
 
 ## 3. 실행
 
@@ -80,7 +84,7 @@ build\default\Debug\spscan-proto.exe
 
 ### "Qt6 not found"
 
-Qt 설치 경로를 CMake에 알려줘야 함. **컴파일러 ABI와 맞는 경로**를 사용:
+Qt 설치 경로를 CMake에 알려줘야 합니다. **컴파일러 ABI와 맞는 경로**를 사용하세요.
 
 ```bash
 # MinGW kit
