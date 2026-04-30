@@ -1,9 +1,5 @@
 #pragma once
-// ============================================================
-//  tests/dummy_data.hpp -- GUI prototype demo data
-//
-//  Kept small and predictable for the SSH/HTTP/FTP/SMTP/TLS probes.
-// ============================================================
+//  tests/dummy_data.hpp -> GUI prototype demo data 용도
 
 #include "core/result.hpp"
 #include <vector>
@@ -37,8 +33,6 @@ inline std::vector<core::ScanResult> make_dummy_results() {
         cve.cvss_score      = 5.3f;
         cve.severity        = Severity::Medium;
         cve.epss_score      = 0.85;
-        cve.nuclei_verified = true;
-        cve.nuclei_template_id = "CVE-2018-15473";
         r.cves.push_back(cve);
 
         results.push_back(r);
@@ -76,7 +70,6 @@ inline std::vector<core::ScanResult> make_dummy_results() {
         cve2.cvss_score  = 9.8f;
         cve2.severity    = Severity::Critical;
         cve2.epss_score  = 0.97;
-        cve2.nuclei_verified = true;
         r.cves.push_back(cve2);
 
         results.push_back(r);
@@ -92,7 +85,7 @@ inline std::vector<core::ScanResult> make_dummy_results() {
         r.state       = PortState::Open;
         r.rtt         = std::chrono::milliseconds(2);
         r.ja4s        = "t13d3112h2_e8f1e7e78f70_6bebaf5329ac";
-        r.ja4x        = "2bab15409345e01f_c32a5380a08cec8d_4f48e4e00304ed25";
+        r.ja4x        = "a1b2c3d4e5f6a7b8_c32a5380a08cec8d_4f48e4e00304ed25";
         r.cdn         = "cloudflare";
         r.os_guess    = "Linux 5.4";
 
@@ -163,7 +156,6 @@ inline std::vector<core::ScanResult> make_dummy_results() {
         cve.cvss_score      = 9.8f;
         cve.severity        = Severity::Critical;
         cve.epss_score      = 0.91;
-        cve.nuclei_verified = true;
         r.cves.push_back(cve);
 
         results.push_back(r);
@@ -222,8 +214,6 @@ inline std::vector<core::ScanResult> make_dummy_results() {
         cve.cvss_score      = 10.0f;
         cve.severity        = Severity::Critical;
         cve.epss_score      = 0.94;
-        cve.nuclei_verified = true;
-        cve.nuclei_template_id = "CVE-2022-0543";
         r.cves.push_back(cve);
 
         results.push_back(r);

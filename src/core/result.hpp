@@ -32,10 +32,7 @@ struct CveInfo {
     std::string description;    // NVD description
     float       cvss_score{0};  // 0.0 ~ 10.0
     Severity    severity{Severity::None};
-
     double      epss_score{0};          // 0.0 ~ 1.0  (FIRST EPSS API사용)
-    bool        nuclei_verified{false}; // proposed - unconfirmed
-    std::string nuclei_template_id;     // proposed - unconfirmed
 };
 
 struct ServiceInfo {
@@ -93,12 +90,6 @@ struct ScanResult {
     [[nodiscard]] bool has_critical_cve() const noexcept {
         for (const auto& c : cves)
             if (c.severity == Severity::Critical) return true;
-        return false;
-    }
-
-    [[nodiscard]] bool has_verified_cve() const noexcept {
-        for (const auto& c : cves)
-            if (c.nuclei_verified) return true;
         return false;
     }
 };
