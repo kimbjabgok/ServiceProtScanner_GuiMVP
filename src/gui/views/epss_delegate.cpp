@@ -5,7 +5,8 @@ namespace sps::gui {
 void EpssDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const {
         //현재 칼럼이 EPSS 컬럼이 아니면 기본 delegate에게 그리도록 넘김.
-        if (index.column() != ResultModel::ColMaxEpss) {
+        if (index.column() != ResultModel::ColMaxEpss &&
+            index.column() != ResultModel::ColMaxPercentile) {
             QStyledItemDelegate::paint(painter, option, index);
             return;
         }

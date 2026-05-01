@@ -29,6 +29,7 @@ QVariant ResultModel::headerData(int section, Qt::Orientation orientation,
             case ColCveCount:  return "CVEs";
             case ColMaxCvss:   return "CVSS";
             case ColMaxEpss:   return "EPSS";
+            case ColMaxPercentile: return "Percentile";
             case ColRisk:      return "Risk";
             case ColVerified:  return "Verified";
             case ColJa4s:      return "JA4S";
@@ -55,6 +56,7 @@ QVariant ResultModel::data(const QModelIndex& index, int role) const {
                 case ColCveCount:  return static_cast<int>(r.cves.size());
                 case ColMaxCvss:   return r.cves.empty() ? QVariant{} : QVariant{r.max_cvss()};
                 case ColMaxEpss:   return r.cves.empty() ? QVariant{} : QVariant{r.max_epss()};
+                case ColMaxPercentile: return r.cves.empty() ? QVariant{} : QVariant{r.max_percentile()};
                 case ColRisk:      return r.cves.empty() ? QVariant{} : QVariant{QString::number(r.max_risk(), 'f', 2)};
                 //Verified 열은 CVE가 없는 경우 빈 칸, CVE는 있지만 검증된 CVE가 없는 경우 "0/n", 검증된 CVE가 있는 경우 "✓ m/n" 형식으로 표시.
                 case ColVerified: {
@@ -79,6 +81,9 @@ QVariant ResultModel::data(const QModelIndex& index, int role) const {
         }
         if (role == Qt::UserRole && index.column() == ColMaxEpss) {
             return r.max_epss();
+        }
+        if (role == Qt::UserRole && index.column() == ColMaxPercentile) {
+            return r.max_percentile();
         }
         if (role == Qt::UserRole && index.column() == ColRisk) {
             return r.max_risk();

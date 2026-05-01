@@ -75,6 +75,8 @@ void MainWindow::setup_delegates() {
     ui_->tableView->setItemDelegateForColumn(ResultModel::ColMaxCvss, cvss_del);
     auto* epss_del = new EpssDelegate(this);
     ui_->tableView->setItemDelegateForColumn(ResultModel::ColMaxEpss, epss_del);
+    auto* percentile_del = new EpssDelegate(this);
+    ui_->tableView->setItemDelegateForColumn(ResultModel::ColMaxPercentile, percentile_del);
     auto* risk_del = new RiskDelegate(this);
     ui_->tableView->setItemDelegateForColumn(ResultModel::ColRisk, risk_del);
     ui_->tableView->sortByColumn(ResultModel::ColRisk, Qt::DescendingOrder);

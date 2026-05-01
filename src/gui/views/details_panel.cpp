@@ -68,23 +68,27 @@ void DetailsPanel::showResult(const core::ScanResult& r) {
         for (const auto& cve : r.cves) {
           //각 CVE마다 색상을 계산
             QString color = cvss_html_color(cve.cvss_score);
-            QString epssColor = epss_html_color(cve.epss_score);
-            const double risk = static_cast<double>(cve.cvss_score) * cve.epss_score;
+            QString epssColor = epss_html_color(cve.epss);
+            const double risk = static_cast<double>(cve.cvss_score) * cve.epss;
             html += QString(
                 "<div style='margin-bottom:8px; padding:6px; "
                 "background:%1; border-radius:4px;'>"
                 "<b>%2</b> &mdash; CVSS: %3 | "
                 "<span style='background:%4; color:#ffffff; font-weight:bold; "
-                "padding:1px 5px; border-radius:3px;'>EPSS: %5&#37;</span><br>"
-                "<b>Risk Score:</b> %6<br>"
-                "<small>%7</small></div>")
+                "padding:1px 5px; border-radius:3px;'>EPSS: %5&#37;</span> "
+                "<span>Percentile: %6&#37;</span><br>"
+                "<b>Risk Score:</b> %7<br>"
+                "<b>Nuclei Verified:</b> %8<br>"
+                "<small>%9</small></div>")
                 .arg(color)
                 .arg(QString::fromStdString(cve.cve_id))
                 .arg(cve.cvss_score, 0, 'f', 1)
                 .arg(epssColor)
-                .arg(qRound(cve.epss_score * 100.0)) //0.85 같은 EPSS를 85 퍼센트로 전환.
+                .arg(qRound(cve.epss * 100.0)) //0.85 같은 EPSS를 85 퍼센트로 전환.
+                .arg(qRound(cve.percentile * 100.0))
                 .arg(risk, 0, 'f', 2)
-                .arg(QString::fromStdString(cve.description));
+                .arg(cve.nuclei_verified ? "yes" : "no")
+                .arg(QString::fromStdString(cve.description).toHtmlEscaped());
         }
     } else {
         html += "<i>No known CVEs</i>";

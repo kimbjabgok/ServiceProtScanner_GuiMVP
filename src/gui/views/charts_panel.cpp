@@ -17,7 +17,7 @@ bool is_probe_result(const core::ScanResult& r) {
     const auto& service = r.service.name;
     return service == "ssh" ||
            service == "http" ||
-           service == "https" ||
+           service == "tls" ||
            service == "ftp" ||
            service == "smtp";
 }

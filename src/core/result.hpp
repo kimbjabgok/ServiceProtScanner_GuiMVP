@@ -30,7 +30,8 @@ struct CveInfo {
     std::string description;
     float       cvss_score{0};
     Severity    severity{Severity::None};
-    double      epss_score{0};
+    double      epss{0};
+    double      percentile{0};
     bool        nuclei_verified{false};
 };
 
@@ -81,7 +82,14 @@ struct ScanResult {
     //CVE 목록에서 가장 높은 EPSS 점수를 반환하는 함수. CVE가 없는 경우 0을 반환.
     [[nodiscard]] double max_epss() const noexcept {
         double m = 0;
-        for (const auto& c : cves) m = (c.epss_score > m) ? c.epss_score : m;
+        for (const auto& c : cves) m = (c.epss > m) ? c.epss : m;
+        return m;
+    }
+
+    //CVE 목록에서 가장 높은 백분위 점수를 반환하는 함수. CVE가 없는 경우 0을 반환.
+    [[nodiscard]] double max_percentile() const noexcept {
+        double m = 0;
+        for (const auto& c : cves) m = (c.percentile > m) ? c.percentile : m;
         return m;
     }
 
@@ -89,7 +97,7 @@ struct ScanResult {
     [[nodiscard]] double max_risk() const noexcept {
         double m = 0;
         for (const auto& c : cves) {
-            const double risk = static_cast<double>(c.cvss_score) * c.epss_score;
+            const double risk = static_cast<double>(c.cvss_score) * c.epss;
             if (risk > m) m = risk;
         }
         return m;

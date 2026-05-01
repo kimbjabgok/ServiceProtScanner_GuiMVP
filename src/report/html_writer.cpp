@@ -120,14 +120,18 @@ void HtmlWriter::write(const std::string& path,
     }
     ss << "</table>\n";
 
-    ss << "<h2>Open Port Details</h2>\n";
+    ss << "<h2>Result Details</h2>\n";
     for (const auto& r : results) {
-        if (r.state != core::PortState::Open) continue;
         ss << "<div class='detail'>"
-           << "<h3>" << r.port << "/" << html_escape(r.protocol) << " - "
+           << "<h3>" << html_escape(r.target_host) << ":" << r.port << "/"
+           << html_escape(r.protocol) << " - "
            << html_escape(r.service.name) << "</h3>"
+           << "<p><b>Resolved IP:</b> " << html_escape(r.resolved_ip) << "</p>"
+           << "<p><b>State:</b> " << state_str(r.state) << "</p>"
+           << "<p><b>RTT:</b> " << r.rtt.count() << " ms</p>"
            << "<p><b>Product:</b> " << html_escape(r.service.product) << " "
            << html_escape(r.service.version) << "</p>";
+        if (!r.service.extra_info.empty()) ss << "<p><b>Info:</b> " << html_escape(r.service.extra_info) << "</p>";
         if (!r.os_guess.empty()) ss << "<p><b>OS:</b> " << html_escape(r.os_guess) << "</p>";
         if (!r.cdn.empty()) ss << "<p><b>CDN:</b> " << html_escape(r.cdn) << "</p>";
         if (!r.ja4s.empty()) ss << "<p><b>JA4S:</b> <code>" << html_escape(r.ja4s) << "</code></p>";
@@ -138,11 +142,13 @@ void HtmlWriter::write(const std::string& path,
         if (!r.cves.empty()) {
             ss << "<b>CVEs:</b>";
             for (const auto& cve : r.cves) {
-                const double risk = static_cast<double>(cve.cvss_score) * cve.epss_score;
+                const double risk = static_cast<double>(cve.cvss_score) * cve.epss;
                 ss << "<div class='cve'><b>" << html_escape(cve.cve_id) << "</b> "
                    << "(" << severity_str(cve.severity) << ", CVSS " << cve.cvss_score
-                   << ", EPSS " << static_cast<int>(cve.epss_score * 100)
-                   << "%, Risk " << risk << ")<br>"
+                   << ", EPSS " << static_cast<int>(cve.epss * 100)
+                   << "%, Percentile " << static_cast<int>(cve.percentile * 100)
+                   << "%, Risk " << risk
+                   << ", Nuclei Verified " << (cve.nuclei_verified ? "yes" : "no") << ")<br>"
                    << html_escape(cve.description) << "</div>";
             }
         }

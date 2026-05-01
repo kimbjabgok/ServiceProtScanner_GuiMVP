@@ -11,6 +11,7 @@ class ResultModel : public QAbstractTableModel {    //QAbstractTableModel을 상
     Q_OBJECT
 
 public:
+    //테이블의 열을 나타내는 enum(순서).
     enum Column {
         ColPort = 0,
         ColService,
@@ -19,6 +20,7 @@ public:
         ColCveCount,
         ColMaxCvss,
         ColMaxEpss,
+        ColMaxPercentile,
         ColRisk,
         ColVerified,
         ColJa4s,
